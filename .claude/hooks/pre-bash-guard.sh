@@ -9,26 +9,24 @@ set -euo pipefail
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // ""')
 
-# Patterns proibidos. Cada linha é um regex (POSIX BRE).
-# Adicione/remova conforme o contexto do projeto.
+# Patterns proibidos. Cada linha é um regex (POSIX ERE — usado com grep -E).
+# Cuidado ao alterar: padrões frouxos geram falso-positivo; ancore o destino
+# do comando (espaço ou fim de linha) sempre que possível.
 DANGEROUS_PATTERNS=(
-  'rm -rf /'
-  'rm -rf \*'
-  'rm -rf ~'
-  '> /dev/sda'
-  'dd if=.* of=/dev/'
+  'rm -rf +/([[:space:]]|$)'        # `rm -rf /` literal, não `rm -rf /tmp/...`
+  'rm -rf +\*([[:space:]]|$)'
+  'rm -rf +~([[:space:]]|$)'
+  '> +/dev/sd[a-z]'
+  'dd .*of=/dev/sd[a-z]'
   'mkfs\.'
-  ':\(\)\{ :\|:& \};:'   # fork bomb
-  'curl .* \| sh'
-  'curl .* \| bash'
-  'wget .* \| sh'
-  'wget .* \| bash'
-  'chmod -R 777 /'
-  'DROP DATABASE'
-  'DROP TABLE'
-  'TRUNCATE TABLE'
-  'git push --force origin (main|master|production)'
-  'git push -f origin (main|master|production)'
+  ':\(\)\{ *:\|: *& *\};:'           # fork bomb
+  'curl [^|]* \| *(sh|bash)'
+  'wget [^|]* \| *(sh|bash)'
+  'chmod -R 777 +/([[:space:]]|$)'
+  '\bDROP DATABASE\b'
+  '\bDROP TABLE\b'
+  '\bTRUNCATE TABLE\b'
+  'git push +(--force|-f) +origin +(main|master|production)\b'
 )
 
 for pattern in "${DANGEROUS_PATTERNS[@]}"; do
@@ -40,7 +38,10 @@ for pattern in "${DANGEROUS_PATTERNS[@]}"; do
 done
 
 # Avisa (não bloqueia) sobre comandos sensíveis em paths protegidos.
-if echo "$COMMAND" | grep -qE 'rm .*\.env|rm .*secrets|rm .*credentials'; then
+# Ancora `rm` no início de um comando (após start, ;, &, |) e só inspeciona
+# argumentos até o próximo separador, evitando falso-positivo quando o nome
+# sensível aparece em outro comando da mesma linha.
+if echo "$COMMAND" | grep -qE '(^|[;&|]) *rm [^;&|]*(\.env(\.|$|[[:space:]/])|/secrets/|/credentials(\.|/))'; then
   echo "⚠️  Tentativa de remover arquivo sensível. Confirme se é intencional." >&2
   exit 2
 fi
