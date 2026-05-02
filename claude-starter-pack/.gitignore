@@ -1,0 +1,9 @@
+# Claude Code — local settings (preferências pessoais não devem ir pro git)
+.claude/settings.local.json
+
+# Logs gerados pelos hooks (ative se for usar)
+.claude/logs/
+.claude/bash-commands.log
+
+# Cache local
+.claude/.cache/

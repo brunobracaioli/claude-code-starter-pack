@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "_comment": "Suas preferências pessoais. Auto-gitignored — não versione.",
+
+  "spinnerVerbs": {
+    "mode": "append",
+    "verbs": ["Hackeando", "Arquitetando", "Refatorando", "Pensando alto"]
+  },
+
+  "outputStyle": "Default",
+
+  "permissions": {
+    "allow": [
+      "Bash(docker compose:*)",
+      "Bash(terraform plan:*)"
+    ]
+  }
+}

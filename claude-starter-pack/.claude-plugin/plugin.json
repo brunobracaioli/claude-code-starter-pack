@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "b2tech-starter",
+  "version": "1.0.0",
+  "description": "Starter pack B2 Tech: hooks de segurança, skills de code review e security audit. Pensado para projetos novos com stack Python/Flask + Next.js/TS em GCP.",
+  "author": {
+    "name": "Bruno Bracaioli",
+    "email": "bruno@b2tech.com",
+    "url": "https://b2tech.io"
+  },
+  "homepage": "https://b2tech.io",
+  "repository": "https://github.com/brunobracaioli/claude-code-starter-pack",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "code-review",
+    "ddd",
+    "vertical-slice",
+    "python",
+    "nextjs",
+    "gcp",
+    "b2tech"
+  ],
+  "skills": ["./skills/"]
+}
