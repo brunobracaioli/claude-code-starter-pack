@@ -30,6 +30,7 @@ Permissões determinísticas · Hooks que rodam 100% das vezes · Skills sob dem
 - [Quick start](#-quick-start)
 - [Hooks](#-hooks)
 - [Skills](#-skills)
+- [Agents](#-agents)
 - [Permissões](#-permissões-settingsjson)
 - [Distribuir como plugin](#-distribuir-como-plugin)
 - [Novidades da 2.0](#-novidades-da-20)
@@ -82,11 +83,13 @@ seu-projeto/
 │   │   ├── pre-commit-secrets.sh       # 🔍 Escaneia secrets antes de commit/push
 │   │   ├── post-edit-format.sh         # 🎨 Formata + lint após cada edição
 │   │   └── block-secrets.sh            # 🔒 Guard extra p/ paths sensíveis (opcional)
-│   └── skills/
-│       ├── code-review-b2/SKILL.md     # 👀 Revisão padrão B2 Tech (VSA + DDD)
-│       ├── security-check/SKILL.md     # 🔐 Auditoria Security by Design (OWASP)
-│       ├── commit/SKILL.md             # ✍️  Conventional commits assistidos
-│       └── frontend-design/SKILL.md    # 🎭 Frontend distinto, sem "AI slop"
+│   ├── skills/
+│   │   ├── code-review-b2/SKILL.md     # 👀 Revisão padrão B2 Tech (VSA + DDD)
+│   │   ├── security-check/SKILL.md     # 🔐 Auditoria Security by Design (OWASP)
+│   │   ├── commit/SKILL.md             # ✍️  Conventional commits assistidos
+│   │   └── frontend-design/SKILL.md    # 🎭 Frontend distinto, sem "AI slop"
+│   └── agents/
+│       └── web-researcher.md           # 🔎 Pesquisa técnica na web (docs, CVEs, libs)
 ├── .claude-plugin/
 │   └── plugin.json                     # 📦 Metadados do plugin b2tech-starter
 ├── .mcp.json                           # 🔌 MCP servers do projeto (vazio por padrão)
@@ -179,6 +182,21 @@ contexto da conversa bate com a `description`.
 
 ---
 
+## 🔎 Agents
+
+Subagentes rodam em contexto isolado, com tools restritas e system prompt focado —
+ideais para tarefas delimitadas que não devem poluir o contexto principal.
+
+| Agent | Quando invocar | Cobre |
+|-------|----------------|-------|
+| 🔎 **`web-researcher`** | *"pesquise"*, *"procure docs"*, *"compare libraries"*, *"tem package para"*, *"busque CVE"* — ou quando precisa de contexto externo ao codebase | Docs & APIs oficiais, best practices, comparação de libs (manutenção, bundle, licença), CVEs e troubleshooting. Cruza ≥2 fontes e devolve summary → findings → recommendation → sources. |
+
+> ⚙️ Roda no **`sonnet`** com tools mínimas (`WebSearch`, `WebFetch`, `Read`, `Grep`,
+> `Glob`), `maxTurns: 20` e `memory: project` — checa pesquisas anteriores antes de
+> buscar de novo e salva achados reutilizáveis.
+
+---
+
 ## 🔐 Permissões (`settings.json`)
 
 Defense in depth desde o primeiro prompt — três níveis de permissão:
@@ -217,6 +235,7 @@ Mapeado direto dos commits desde o `first commit`:
 
 - 🆕 **Skill `commit`** — Conventional Commits assistidos a partir do diff.
 - 🆕 **Skill `frontend-design`** — UIs distintas, sem estética genérica de IA.
+- 🆕 **Agent `web-researcher`** — pesquisa técnica na web (docs, CVEs, comparação de libs) em contexto isolado.
 - 🆕 **Hook `block-secrets.sh`** — guard opcional, mais agressivo, para paths sensíveis.
 - 🆕 **`.mcp.json`** — ponto de entrada para MCP servers do projeto.
 - 🔧 **`settings.json` revisado** — permissões `allow`/`ask`/`deny` mais granulares,
@@ -231,7 +250,8 @@ Mapeado direto dos commits desde o `first commit`:
 
 O que ficou **de fora de propósito**, e por quê:
 
-- **Subagentes (`agents/`)** → adicione conforme necessidade real; evite genéricos.
+- **Subagentes genéricos (`agents/`)** → o pack inclui só o `web-researcher` (caso
+  de uso claro e reutilizável); adicione outros conforme necessidade real, evite genéricos.
 - **Slash commands dedicados (`commands/`)** → skills são mais flexíveis e suportam
   *supporting files*.
 - **MCP servers configurados** → projeto-específico; `.mcp.json` vem vazio, pronto
